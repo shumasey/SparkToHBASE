@@ -40,3 +40,4 @@ df4.write.options(Map(HBaseTableCatalog.tableCatalog -> catalog, HBaseTableCatal
 	.format(“org.apache.spark.sql.execution.datasources.hbase”)
 	.save()
 ```
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/source/result.png)
