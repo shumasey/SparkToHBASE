@@ -8,6 +8,8 @@ This tutorial demonstrates how to move log data from Hadoop to HBase using Spark
 3. Install HBase
 4. Install Spark-2.3.3-bin-hadoop2.7 (because Spark-HBase connector uses Scala 2.11)
 
+Go to HBase __/lib__ folder and copy all __hbase-`*`.jar__ files to Spark __/jars__ folder. Go to HBase __/lib/client-facing-thirdparty__ folder and copy file __htrace-core4-4.2.0-incubating.jar__ to Spark __/jars__ folder. 
+
 ### Load data to Hadoop
 
 Open Command Prompt as Administrator and type __start-all__. This opens four windows, don't close them. Then type __hdfs dfs -ls /__ to see root catalogue.
