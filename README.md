@@ -30,12 +30,16 @@ val log=spark.read.format("csv")
 	.option("header",true)
 	.option("delimiter",";")
 	.load("hdfs://0.0.0.0:19000/input/*.log")
+```
 ![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/readlogs.png)
 
+```scala
 // HBase requires unique rowkey for every row, so we have to generate them. First let's make timestamp column from String date and time.
 val log1=log.withColumn("dt",concat(col("date"),lit(" "),col("time")))
+```
 ![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/concat.png)
 
+```scala
 // Spark 2.3.3 doesn't support milliseconds, so here we need use UDF
 import java.text.SimpleDateFormat
 import java.sql.Timestamp
@@ -53,21 +57,24 @@ val getTimestamp: (String => Option[Timestamp])=s => s match {
 val getTimestampUDF=udf(getTimestamp)
 val tts=getTimestampUDF($"dt")
 val log2=log1.withColumn("ts", tts)
+```
 ![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/timestamp.png)
 
+```scala
 // Now we can use window for generating technical key
 import org.apache.spark.sql.expressions.Window
 val key=Window.partitionBy('dummy).orderBy('ts)
 val log3=log2.withColumn("key", rank over key)
+```
 ![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/key.png)
 
+```scala
 // Take columns to write to HBase
 val log4=log3.select('key,'user,'date,'time,'Device,'Model,'gt,'x,'y,'z)
 
 // To write data to HBase we need to load special connector
 :require C:/GitHub/SparkToHBASE/jar/shc-core-1.1.0.3.1.5.6121-6.jar
 import org.apache.spark.sql.execution.datasources.hbase.HBaseTableCatalog
-
 
 // Create HBASE catalog
 def catalog=s"""{
