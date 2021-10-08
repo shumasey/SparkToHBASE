@@ -20,7 +20,7 @@ Type __hdfs getconf -confkey fs.defaultFS__ to get hdfs IP and port, Spark needs
 
 ### Read data to Spark and transform them
 
-Open new Command Prompt as Administrator and type __spark-shell__. You can either type __:load /C:/GitHub/SparkToHBASE/Spark_to_hbase.scala__(don't forget to start Hbase first) or paste command lines one by one in order to see intermediate results.
+Open new Command Prompt as Administrator and type __spark-shell__. You can either type __:load /C:/GitHub/SparkToHBASE/Spark_to_hbase.scala__ (don't forget to start Hbase first) or paste command lines one by one in order to see intermediate results.
 
 
 ```scala
