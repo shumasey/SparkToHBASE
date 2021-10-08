@@ -11,10 +11,10 @@ This tutorial demonstrates how to move log data from Hadoop to HBase using Spark
 ### Load data to Hadoop
 
 Open Command Prompt as Administrator and type __start-all__. This opens four windows, don't close them. Then type __hdfs dfs -ls /__ to see root catalogue.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/starthdfs.png)
 
 It's empty from the beginning. Type __hdfs dfs -put /C:/GitHub/SparkToHBASE/input hdfs://__ to load log files, then check catalogue again.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/puthdfs.png)
 
 Type __hdfs getconf -confkey fs.defaultFS__ to get hdfs IP and port, Spark needs them.
 
@@ -30,11 +30,11 @@ val log=spark.read.format("csv")
 	.option("header",true)
 	.option("delimiter",";")
 	.load("hdfs://0.0.0.0:19000/input/*.log")
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/readlogs.png)
 
 // HBase requires unique rowkey for every row, so we have to generate them. First let's make timestamp column from String date and time.
 val log1=log.withColumn("dt",concat(col("date"),lit(" "),col("time")))
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/concat.png)
 
 // Spark 2.3.3 doesn't support milliseconds, so here we need use UDF
 import java.text.SimpleDateFormat
@@ -53,13 +53,13 @@ val getTimestamp: (String => Option[Timestamp])=s => s match {
 val getTimestampUDF=udf(getTimestamp)
 val tts=getTimestampUDF($"dt")
 val log2=log1.withColumn("ts", tts)
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/timestamp.png)
 
 // Now we can use window for generating technical key
 import org.apache.spark.sql.expressions.Window
 val key=Window.partitionBy('dummy).orderBy('ts)
 val log3=log2.withColumn("key", rank over key)
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/key.png)
 
 // Take columns to write to HBase
 val log4=log3.select('key,'user,'date,'time,'Device,'Model,'gt,'x,'y,'z)
@@ -100,13 +100,13 @@ log4.write.options(Map(HBaseTableCatalog.tableCatalog -> catalog, HBaseTableCata
 	.save()
 ```
 In case of strange error just repeat the command.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/writehbase.png)
 
 Go to HBase window and type __list__ again. Now there is a table 'logs'.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/list.png)
 
 Type __scan 'logs', {LIMIT=>2}__ to see table contents.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/scan.png)
 
 Type __count 'logs'__ to check all rows was loaded.
-![img]
+![img](https://github.com/shumasey/SparkToHBASE/blob/main/screenshots/count.png)
